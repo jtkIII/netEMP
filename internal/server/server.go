@@ -1,6 +1,10 @@
 package server
 
-import "net/http"
+import (
+	"log"
+	"net/http"
+	"netEMP/internal/events"
+)
 
 type Server struct {
 	mux *http.ServeMux
@@ -16,15 +20,27 @@ func New() *Server {
 }
 
 func (s *Server) routes() {
-	s.mux.HandleFunc("GET /healthz", s.handleHealth)
+	s.mux.HandleFunc("POST /ingest", s.handleIngest)
 }
 
-func (s *Server) handleHealth(
+func (s *Server) handleIngest(
 	w http.ResponseWriter,
 	r *http.Request,
 ) {
-	w.Header().Set("Content-Type", "application/json")
-	w.Write([]byte(`{"status":"ok"}`))
+	event, err := events.FromRequest(r)
+	if err != nil {
+		http.Error(w, "bad request", http.StatusBadRequest)
+		return
+	}
+
+	log.Printf(
+		"event from=%s method=%s path=%s",
+		event.SourceIP,
+		event.Method,
+		event.Path,
+	)
+
+	w.WriteHeader(http.StatusAccepted)
 }
 
 func (s *Server) Start(addr string) error {
