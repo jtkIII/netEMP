@@ -4,10 +4,12 @@ import (
 	"log"
 	"net/http"
 	"netEMP/internal/events"
+	"netEMP/internal/pipeline"
 )
 
 type Server struct {
-	mux *http.ServeMux
+	mux      *http.ServeMux
+	pipeline *pipeline.Pipeline
 }
 
 func New() *Server {
