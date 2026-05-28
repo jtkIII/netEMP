@@ -1,8 +1,8 @@
 package pipeline
 
 import (
-	"netEMP/internal/events"
-	"netEMP/internal/filters"
+	"netemp/internal/events"
+	"netemp/internal/filters"
 )
 
 type Pipeline struct {

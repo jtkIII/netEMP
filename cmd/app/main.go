@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"netEMP/internal/server"
+	"netemp/internal/server"
 )
 
 func main() {

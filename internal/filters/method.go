@@ -1,6 +1,6 @@
 package filters
 
-import "netEMP/internal/events"
+import "netemp/internal/events"
 
 type MethodFilter struct {
 	Allowed string
