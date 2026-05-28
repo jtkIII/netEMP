@@ -1,8 +1,8 @@
 package server
 
 import (
-	"log"
 	"net/http"
+	"netemp/internal/actions"
 	"netemp/internal/events"
 	"netemp/internal/filters"
 	"netemp/internal/pipeline"
@@ -15,8 +15,13 @@ type Server struct {
 
 func New() *Server {
 	p := pipeline.New(
-		filters.MethodFilter{
-			Allowed: "POST",
+		[]filters.Filter{
+			filters.MethodFilter{
+				Allowed: "POST",
+			},
+		},
+		[]actions.Action{
+			actions.LogAction{},
 		},
 	)
 
@@ -26,7 +31,6 @@ func New() *Server {
 	}
 
 	s.routes()
-
 	return s
 }
 
@@ -35,36 +39,32 @@ func (s *Server) routes() {
 	s.mux.HandleFunc("/healthz", s.handleHealthz)
 }
 
-// handleHealthz responds with HTTP 200 OK to indicate the server is healthy.
-func (s *Server) handleHealthz(
-	w http.ResponseWriter,
-	r *http.Request,
-) {
+func (s *Server) handleHealthz(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("ok\n"))
 }
 
-// handleIngest processes incoming events. It validates the request,
-// applies filters, and responds with appropriate HTTP status codes
-func (s *Server) handleIngest(
-	w http.ResponseWriter,
-	r *http.Request,
-) {
+// Processes incoming events, validates request, applies filters,
+// and responds with appropriate HTTP status codes
+func (s *Server) handleIngest(w http.ResponseWriter, r *http.Request) {
 	event, err := events.FromRequest(r)
 	if err != nil {
 		http.Error(w, "bad request", http.StatusBadRequest)
 		return
 	}
 
-	if !s.pipeline.Process(event) {
-		http.Error(w, "forbidden", http.StatusForbidden)
+	if err := s.pipeline.Process(
+		r.Context(),
+		event,
+	); err != nil {
+
+		http.Error(
+			w,
+			"internal server error",
+			http.StatusInternalServerError,
+		)
+
 		return
 	}
-
-	log.Printf(
-		"accepted event from=%s path=%s",
-		event.SourceIP,
-		event.Path,
-	)
 
 	w.WriteHeader(http.StatusAccepted)
 }

@@ -1,4 +1,4 @@
-# netEMP
+# netemp
 
 Lightweight event-driven network monitoring and processing service written in Go.
 
@@ -26,7 +26,7 @@ Lightweight event-driven network monitoring and processing service written in Go
 # Project Structure
 
 ```text
-netEMP/
+netemp/
 ├── cmd/
 │   └── app/
 │       └── main.go
@@ -57,7 +57,7 @@ Filters
 Actions (planned)
 ```
 
-The core architectural idea is:
+The core idea is:
 
 * transport-specific ingestion
 * protocol-independent internal events
